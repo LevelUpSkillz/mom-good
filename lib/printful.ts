@@ -39,8 +39,23 @@ async function printfulRequest(path: string) {
   const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
   if (storeId) headers["X-PF-Store-Id"] = storeId;
   const response = await fetch(`https://api.printful.com${path}`, { headers, cache: "no-store" });
-  if (!response.ok) throw new Error(`Printful request failed (${response.status}).`);
+  if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    const detail = body ? ` ${body.slice(0, 240)}` : "";
+    throw new Error(`Printful request failed (${response.status}).${detail}`);
+  }
   return response.json();
+}
+
+export async function testPrintfulConnection() {
+  const startedAt = Date.now();
+  const payload = await printfulRequest("/product-templates?limit=1");
+  return {
+    ok: true,
+    latencyMs: Date.now() - startedAt,
+    storeScoped: Boolean(getPrintfulConfig().storeId),
+    sampleCount: Array.isArray(payload?.result) ? payload.result.length : undefined,
+  };
 }
 
 export async function fetchPrintfulTemplate(reference: string) {
