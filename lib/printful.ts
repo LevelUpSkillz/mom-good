@@ -30,11 +30,7 @@ export function parsePrintfulReference(input: string) {
 export function getPrintfulConfig() {
   const token = process.env.PRINTFUL_API_TOKEN;
   const storeId = process.env.PRINTFUL_STORE_ID;
-  return {
-    connected: Boolean(token),
-    token,
-    storeId,
-  };
+  return { connected: Boolean(token), token, storeId };
 }
 
 async function printfulRequest(path: string) {
@@ -50,4 +46,20 @@ async function printfulRequest(path: string) {
 export async function fetchPrintfulTemplate(reference: string) {
   const id = parsePrintfulReference(reference);
   return printfulRequest(`/product-templates/${encodeURIComponent(id)}`);
+}
+
+export function normalizePrintfulTemplate(payload: any): NormalizedPrintfulProduct {
+  const source = payload?.result ?? payload;
+  const title = String(source?.title || source?.name || "Untitled Printful product");
+  const mockup = source?.mockup_file_url || source?.thumbnail_url || undefined;
+  const variantIds: unknown[] = Array.isArray(source?.available_variant_ids) ? source.available_variant_ids : [];
+  return {
+    externalProductId: source?.external_product_id ? String(source.external_product_id) : undefined,
+    externalTemplateId: source?.id != null ? String(source.id) : undefined,
+    name: title,
+    featuredImage: mockup,
+    galleryImages: mockup ? [mockup] : [],
+    variants: variantIds.map((id) => ({ providerVariantId: String(id), available: true })),
+    raw: payload,
+  };
 }
