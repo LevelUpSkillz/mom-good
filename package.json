@@ -1,6 +1,6 @@
 {
   "name": "mom-good",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,12 +10,14 @@
   },
   "dependencies": {
     "next": "15.5.2",
+    "pg": "^8.13.1",
     "react": "19.1.1",
     "react-dom": "19.1.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^22.15.30",
+    "@types/pg": "^8.11.10",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "typescript": "^5.8.3"
