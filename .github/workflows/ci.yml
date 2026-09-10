@@ -1,0 +1,46 @@
+name: Mom Good CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [develop]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      NODE_ENV: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build without optional integrations
+        run: npm run build
+
+      - name: Verify no supplier/admin secrets are committed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git grep -nE '(PRINTFUL_API_TOKEN|ADMIN_PASSWORD|ADMIN_SESSION_SECRET|DATABASE_URL)=[^[:space:]]+' -- ':!*.example' ':!*.md'; then
+            echo 'A secret-like environment value appears to be committed.'
+            exit 1
+          fi
+          echo 'No committed secret values detected.'
