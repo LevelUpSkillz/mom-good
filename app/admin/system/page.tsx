@@ -30,6 +30,12 @@ export default async function AdminSystemPage() {
       </section>
 
       <section className="panel" style={{ marginTop: 24 }}>
+        <h2>Live connection test</h2>
+        <p className="muted">This diagnostic performs read-only connectivity checks for PostgreSQL and Printful. It does not import, publish, modify, or delete products.</p>
+        <p><a className="button" href="/api/admin/health" target="_blank" rel="noreferrer">Run safe diagnostics</a></p>
+      </section>
+
+      <section className="panel" style={{ marginTop: 24 }}>
         <h2>Safe behavior</h2>
         <p className="muted">Missing integrations stay disabled instead of taking down the storefront. Supplier imports never publish automatically. Existing working integrations are not overwritten by this project.</p>
       </section>
