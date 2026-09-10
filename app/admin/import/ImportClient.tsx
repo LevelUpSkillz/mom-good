@@ -24,6 +24,18 @@ type PreviewResponse = {
   };
 };
 
+type ImportResponse = {
+  ok: boolean;
+  error?: string;
+  message?: string;
+  product?: {
+    id: string;
+    name: string;
+    slug: string;
+    status: string;
+  };
+};
+
 export default function ImportClient() {
   const [reference, setReference] = useState("");
   const [preview, setPreview] = useState<PreviewResponse | null>(null);
@@ -54,12 +66,14 @@ export default function ImportClient() {
       const body = new FormData();
       body.set("reference", reference);
       const response = await fetch("/api/printful/import", { method: "POST", body });
-      const data = await response.json();
+      const data = (await response.json()) as ImportResponse;
       if (!response.ok || !data.ok) throw new Error(data.error || "Import failed.");
-      setMessage(data.message || "Imported as a private draft.");
+      if (!data.product?.id) throw new Error("Import completed but no Mom Good product ID was returned.");
+
+      setMessage(data.message || "Imported as a private draft. Opening product editor…");
+      window.location.assign(`/admin/products/${encodeURIComponent(data.product.id)}`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Import failed.");
-    } finally {
       setImporting(false);
     }
   }
