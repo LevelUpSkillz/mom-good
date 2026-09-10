@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getRuntimeReadiness } from "@/lib/runtime";
 import { getDb } from "@/lib/db";
 import { publishedProducts as fallbackProducts } from "@/lib/catalog";
+import BuyBox from "./BuyBox";
 
 async function loadProduct(slug: string) {
   const readiness = getRuntimeReadiness();
@@ -48,6 +49,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const product: any = await loadProduct(slug);
   if (!product) notFound();
 
+  const readiness = getRuntimeReadiness();
   const name = product.name;
   const description = product.description || product.short_description || product.shortDescription || "";
   const shortDescription = product.short_description ?? product.shortDescription ?? "";
@@ -57,6 +59,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const compareAtPrice = product.compare_at_price ?? product.compareAtPrice;
   const currency = product.currency || "CAD";
   const variants = product.variants || [];
+  const persistentProduct = typeof product.id === "string" && product.id.includes("-");
 
   return (
     <div className="wrap">
@@ -100,10 +103,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </div>
           ) : null}
 
-          <div className="panel" style={{ marginTop: 24 }}>
-            <strong>Checkout not enabled yet.</strong>
-            <p className="muted" style={{ marginBottom: 0 }}>This product can be reviewed publicly without creating a fake payment flow. Checkout will only be enabled once the real payment and fulfillment path is connected.</p>
-          </div>
+          {persistentProduct ? (
+            <BuyBox productId={product.id} variants={variants} checkoutReady={readiness.readyForCheckout} />
+          ) : (
+            <div className="panel" style={{ marginTop: 24 }}>
+              <strong>Preview product.</strong>
+              <p className="muted" style={{ marginBottom: 0 }}>Checkout is only available for real published products stored in Mom Good.</p>
+            </div>
+          )}
         </section>
       </div>
     </div>
