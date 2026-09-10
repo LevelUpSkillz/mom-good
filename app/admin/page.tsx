@@ -39,6 +39,8 @@ export default async function AdminPage() {
           <p className="muted">Catalog, Printful imports, pricing, publication and fulfillment live here.</p>
         </div>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          <a className="button" href="/admin/orders">Orders</a>
+          <a className="button" href="/admin/settings">Settings</a>
           <a className="button" href="/admin/system">System status</a>
           <form action="/api/admin/logout" method="post"><button className="button" type="submit">Sign out</button></form>
         </div>
