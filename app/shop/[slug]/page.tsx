@@ -3,6 +3,7 @@ import { getRuntimeReadiness } from "@/lib/runtime";
 import { getDb } from "@/lib/db";
 import { publishedProducts as fallbackProducts } from "@/lib/catalog";
 import BuyBox from "./BuyBox";
+import type { Metadata } from "next";
 
 async function loadProduct(slug: string) {
   const readiness = getRuntimeReadiness();
@@ -44,6 +45,17 @@ async function loadProduct(slug: string) {
   return fallbackProducts.find((product) => product.slug === slug);
 }
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const product: any = await loadProduct(slug);
+  if (!product) return {};
+  return {
+    title: product.seo_title || `${product.name} | Mom Good`,
+    description: product.seo_description || product.short_description || product.shortDescription,
+    openGraph: { images: product.featured_image ? [product.featured_image] : [] },
+  };
+}
+
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const product: any = await loadProduct(slug);
@@ -62,11 +74,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const persistentProduct = typeof product.id === "string" && product.id.includes("-");
 
   return (
-    <div className="wrap">
+    <div className="wrap productPage">
       <a href="/shop" className="muted">← Back to shop</a>
-      <div className="grid" style={{ marginTop: 24, alignItems: "start" }}>
-        <section>
-          <div className="productVisual" style={{ minHeight: 420 }}>
+      <div className="productDetailGrid">
+        <section className="productGallery">
+          <div className="productVisual productHeroImage">
             {image ? <img src={image} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : null}
           </div>
           {Array.isArray(gallery) && gallery.length > 1 ? (
@@ -80,15 +92,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           ) : null}
         </section>
 
-        <section className="panel">
-          <div className="eyebrow">Mom Good</div>
+        <section className="productInfo">
+          <div className="eyebrow">{product.collection_name || "Mom Good"}</div>
+          {product.badge ? <span className="productBadge staticBadge">{product.badge}</span> : null}
           <h1>{name}</h1>
           {shortDescription ? <p className="muted">{shortDescription}</p> : null}
           <div style={{ display: "flex", gap: 12, alignItems: "baseline", margin: "18px 0" }}>
             <strong style={{ fontSize: 28 }}>{retailPrice != null ? `${Number(retailPrice).toFixed(2)} ${currency}` : "Price unavailable"}</strong>
             {compareAtPrice != null ? <span className="muted" style={{ textDecoration: "line-through" }}>{Number(compareAtPrice).toFixed(2)} {currency}</span> : null}
           </div>
-          {description ? <p>{description}</p> : null}
+          {description ? <p className="productDescription">{description}</p> : null}
 
           {variants.length > 0 ? (
             <div style={{ marginTop: 24 }}>
@@ -111,6 +124,13 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <p className="muted" style={{ marginBottom: 0 }}>Checkout is only available for real published products stored in Mom Good.</p>
             </div>
           )}
+          {(product.materials || product.care_instructions || product.shipping_note) ? (
+            <div className="detailAccordions">
+              {product.materials ? <details open><summary>Materials & feel</summary><p>{product.materials}</p></details> : null}
+              {product.care_instructions ? <details><summary>Care</summary><p>{product.care_instructions}</p></details> : null}
+              {product.shipping_note ? <details><summary>Made & shipped</summary><p>{product.shipping_note}</p></details> : null}
+            </div>
+          ) : null}
         </section>
       </div>
     </div>

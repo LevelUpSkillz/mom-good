@@ -43,6 +43,15 @@ export async function ensureSchema() {
       updated_at timestamptz not null default now(),
       unique(provider, external_template_id)
     );
+    alter table pod_products add column if not exists badge text;
+    alter table pod_products add column if not exists collection_name text;
+    alter table pod_products add column if not exists materials text;
+    alter table pod_products add column if not exists care_instructions text;
+    alter table pod_products add column if not exists shipping_note text;
+    alter table pod_products add column if not exists seo_title text;
+    alter table pod_products add column if not exists seo_description text;
+    alter table pod_products add column if not exists featured boolean not null default false;
+    alter table pod_products add column if not exists sort_order integer not null default 100;
     create table if not exists pod_variants (
       id uuid primary key default gen_random_uuid(),
       product_id uuid not null references pod_products(id) on delete cascade,
