@@ -21,16 +21,7 @@ export default async function AdminProductPage({ params }: { params: Promise<{ i
         <h1>{product.name}</h1>
         <p className="muted">Supplier ID: {product.external_template_id || product.external_product_id || "Not available"}</p>
       </div>
-      <div style={{ marginTop: 28 }}><ProductEditor product={product} /></div>
-      <section style={{ marginTop: 32 }}>
-        <h2>Variants</h2>
-        {variants.rows.length === 0 ? <div className="panel"><p className="muted">No variants imported yet.</p></div> : (
-          <table className="table">
-            <thead><tr><th>Provider variant</th><th>Size</th><th>Color</th><th>SKU</th><th>Available</th></tr></thead>
-            <tbody>{variants.rows.map((variant) => <tr key={variant.id}><td>{variant.provider_variant_id}</td><td>{variant.size || "—"}</td><td>{variant.color || "—"}</td><td>{variant.sku || "—"}</td><td>{variant.available ? "Yes" : "No"}</td></tr>)}</tbody>
-          </table>
-        )}
-      </section>
+      <div style={{ marginTop: 28 }}><ProductEditor product={product} variants={variants.rows} /></div>
     </main>
   );
 }
