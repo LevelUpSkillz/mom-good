@@ -84,12 +84,12 @@ export default async function AdminPage() {
         </div>
       </section>
 
-      <section style={{ marginTop: 36 }}>
-        <h2>Catalog</h2>
+      <section className="catalogSection">
+        <div className="catalogTitle"><div><div className="eyebrow">Merchandising desk</div><h2>Catalog</h2></div><a className="button secondary" href="/shop" target="_blank">View storefront ↗</a></div>
         {rows.length === 0 ? (
           <div className="panel"><p className="muted">No products are loaded yet. Once the database and Printful are ready, import your first supplier product here.</p></div>
         ) : (
-          <table className="table">
+          <div className="tableWrap"><table className="table adminTable">
             <thead><tr><th>Product</th><th>Provider</th><th>Status</th><th>Sync</th><th>Variants</th><th>Price</th><th>Margin</th><th></th></tr></thead>
             <tbody>
               {rows.map((product) => {
@@ -98,19 +98,19 @@ export default async function AdminPage() {
                 const marginPct = retail && base != null ? ((retail - base) / retail) * 100 : null;
                 return (
                   <tr key={product.id}>
-                    <td><strong>{product.name}</strong><div className="muted">{product.category}</div></td>
+                    <td><div className="adminProductCell">{product.featured_image ? <img src={product.featured_image} alt="" /> : <span className="miniPlaceholder" />}<div><strong>{product.name}</strong><small>{product.collection_name || product.category}{product.featured ? " · Featured" : ""}</small></div></div></td>
                     <td>{product.provider}</td>
                     <td><span className="status">{product.status}</span></td>
                     <td>{product.sync_status}</td>
                     <td>{product.variant_count}</td>
                     <td>{retail != null ? `${retail.toFixed(2)} ${product.currency}` : "Not set"}</td>
                     <td>{marginPct == null ? "—" : `${marginPct.toFixed(1)}%`}</td>
-                    <td><a href={`/admin/products/${product.id}`}>Edit</a></td>
+                    <td><a className="rowAction" href={`/admin/products/${product.id}`}>Manage →</a></td>
                   </tr>
                 );
               })}
             </tbody>
-          </table>
+          </table></div>
         )}
       </section>
     </div>
